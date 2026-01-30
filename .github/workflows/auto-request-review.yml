@@ -16,9 +16,17 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const author = context.payload.pull_request.user.login;
+            const reviewers = ["cedik456"].filter((r) => r !== author);
+
+            if (reviewers.length === 0) {
+              core.info(`Skipping review request: PR author is ${author}`);
+              return;
+            }
+
             await github.rest.pulls.requestReviewers({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
-              reviewers: ["cedik456"]
-            })
+              reviewers
+            });
